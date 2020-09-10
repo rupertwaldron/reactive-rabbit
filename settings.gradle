@@ -4,6 +4,7 @@ pluginManagement {
     }
 }
 rootProject.name = 'rabbit'
-include ':rabbitsource'
-include ':rabbit-integration'
+include 'rabbit-source'
+include 'rabbit-integration'
+include 'rabbit-model'
 

@@ -6,7 +6,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.json.simple.JSONObject;
 import rabbit.models.Person;
 
-
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;

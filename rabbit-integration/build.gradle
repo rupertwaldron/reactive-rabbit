@@ -1,11 +1,7 @@
-
-//
-//configurations {
-//    compileOnly {
-//        extendsFrom annotationProcessor
-//    }
-//}
-//
+//apply plugin: 'org.springframework.boot'
 //dependencies {
-//    compile project(':rabbitsource')
+//    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+//    implementation 'org.springframework.boot:spring-boot-starter-integration'
+//    implementation 'org.springframework.integration:spring-integration-amqp'
+//    testImplementation 'org.springframework.amqp:spring-rabbit-test'
 //}
