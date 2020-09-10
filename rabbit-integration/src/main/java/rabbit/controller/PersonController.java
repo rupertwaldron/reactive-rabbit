@@ -1,11 +1,10 @@
-package com.ruppyrup.rabbit.controller;
+package rabbit.controller;
 
-
-import com.ruppyrup.rabbit.models.Person;
-import com.ruppyrup.rabbit.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import rabbit.models.Person;
+import rabbit.service.PersonService;
 
 import java.util.List;
 

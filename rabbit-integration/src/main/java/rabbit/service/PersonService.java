@@ -1,10 +1,10 @@
-package com.ruppyrup.rabbit.service;
+package rabbit.service;
 
-import com.ruppyrup.rabbit.models.Person;
-import com.ruppyrup.rabbit.publisher.Publisher;
-import com.ruppyrup.rabbit.repository.PeopleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rabbit.models.Person;
+
+import rabbit.repository.PeopleRepository;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -20,7 +20,7 @@ public class PersonService {
 
     public void addPerson(Person person) {
         if (peopleRepository.getAll().size() == 0) start = Instant.now();
-        if (peopleRepository.getAll().size() == Publisher.END_INCLUSIVE - 1) finish = Instant.now();
+        if (peopleRepository.getAll().size() == 1000 - 1) finish = Instant.now();
         peopleRepository.add(person);
     }
 

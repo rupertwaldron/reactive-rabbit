@@ -1,20 +1,17 @@
-package com.ruppyrup.rabbit.transformers;
+package rabbit.transformers;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ruppyrup.rabbit.models.MessageDto;
-import com.ruppyrup.rabbit.models.Person;
-import com.ruppyrup.rabbit.service.StarService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
+import rabbit.models.MessageDto;
+import rabbit.models.Person;
+import rabbit.service.StarService;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Service
 public class MessageConverter {

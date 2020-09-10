@@ -1,9 +1,6 @@
-package com.ruppyrup.rabbit.config;
+package rabbit.config;
 
 
-import com.ruppyrup.rabbit.models.Person;
-import com.ruppyrup.rabbit.service.PersonService;
-import com.ruppyrup.rabbit.transformers.MessageConverter;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -20,6 +17,9 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import rabbit.models.Person;
+import rabbit.service.PersonService;
+import rabbit.transformers.MessageConverter;
 
 import java.util.concurrent.Executor;
 

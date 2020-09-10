@@ -1,4 +1,4 @@
-package com.ruppyrup.rabbit.models;
+package rabbit.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

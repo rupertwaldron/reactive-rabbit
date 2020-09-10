@@ -1,4 +1,4 @@
-package com.ruppyrup.rabbit.service;
+package rabbit.service;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

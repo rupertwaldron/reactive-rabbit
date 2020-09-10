@@ -1,12 +1,11 @@
-package com.ruppyrup.rabbit.publisher;
+package com.ruppyrup.publisher;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.ruppyrup.rabbit.models.Person;
-import com.ruppyrup.rabbit.service.StarService;
 import org.json.simple.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import rabbit.models.Person;
+
 
 import java.io.IOException;
 import java.time.Duration;
@@ -15,9 +14,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 public class Publisher {
-
-    @Autowired
-    StarService starService;
 
     private static final String QUEUE_NAME1 = "aName";
     public static final int END_INCLUSIVE = 1000;

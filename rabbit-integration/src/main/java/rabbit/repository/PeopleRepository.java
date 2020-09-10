@@ -1,10 +1,9 @@
-package com.ruppyrup.rabbit.repository;
+package rabbit.repository;
 
-import com.ruppyrup.rabbit.models.Person;
 import org.springframework.stereotype.Repository;
+import rabbit.models.Person;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Repository
