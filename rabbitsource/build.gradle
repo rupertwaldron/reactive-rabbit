@@ -1,0 +1,11 @@
+apply plugin: 'org.springframework.boot'
+//
+//configurations {
+//    compileOnly {
+//        extendsFrom annotationProcessor
+//    }
+//}
+//
+dependencies {
+    compile project(':rabbit-integration')
+}

@@ -1,0 +1,11 @@
+
+//
+//configurations {
+//    compileOnly {
+//        extendsFrom annotationProcessor
+//    }
+//}
+//
+//dependencies {
+//    compile project(':rabbitsource')
+//}
