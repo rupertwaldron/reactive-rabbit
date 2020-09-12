@@ -1,5 +1,7 @@
-//apply plugin: 'org.springframework.boot'
-//
+apply plugin: 'application'
+
 dependencies {
-    compile project(':rabbit-integration')
+    compile project(':rabbit-model')
 }
+
+mainClassName = 'com.ruppyrup.publisher.Publisher'

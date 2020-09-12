@@ -1,4 +1,4 @@
-package models;
+package com.ruppyrup.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

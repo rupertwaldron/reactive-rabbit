@@ -58,6 +58,7 @@ private static final String ENRICHMENT_MESSAGE_CHANNEL = "enrichment_message_cha
     public IntegrationFlow amqpInbound() {
         return IntegrationFlows.from(Amqp.inboundAdapter(rabbitConnectionFactory, "aName"))
                 .log(LoggingHandler.Level.INFO)
+                .transform(messageConverter, "wrapHeaders")
                 .transform(messageConverter, "extractObject")
                 .log(LoggingHandler.Level.INFO)
                 .channel(INCOMING_MESSAGE_CHANNEL)

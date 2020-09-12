@@ -3,8 +3,10 @@ package com.ruppyrup.publisher;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+
+import com.ruppyrup.models.Person;
 import org.json.simple.JSONObject;
-import rabbit.models.Person;
+
 
 import java.io.IOException;
 import java.time.Duration;
@@ -15,7 +17,7 @@ import java.util.stream.IntStream;
 public class Publisher {
 
     private static final String QUEUE_NAME1 = "aName";
-    public static final int END_INCLUSIVE = 1000;
+    public static final int END_INCLUSIVE = 1;
 
     public static void main(String[]args) throws IOException, TimeoutException, InterruptedException {
         ConnectionFactory factory = new ConnectionFactory();

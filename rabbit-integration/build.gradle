@@ -1,7 +1,10 @@
-//apply plugin: 'org.springframework.boot'
-//dependencies {
-//    implementation 'org.springframework.boot:spring-boot-starter-amqp'
-//    implementation 'org.springframework.boot:spring-boot-starter-integration'
-//    implementation 'org.springframework.integration:spring-integration-amqp'
-//    testImplementation 'org.springframework.amqp:spring-rabbit-test'
-//}
+apply plugin: 'application'
+dependencies {
+    implementation 'org.springframework.integration:spring-integration-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-integration'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.integration:spring-integration-test'
+    compile project(':rabbit-model')
+}
+
+mainClassName = 'rabbit.RabbitApplication'

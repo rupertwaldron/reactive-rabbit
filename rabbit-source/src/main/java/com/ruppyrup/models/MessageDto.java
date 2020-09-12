@@ -1,4 +1,4 @@
-package models;
+package com.ruppyrup.models;
 
 import lombok.Data;
 import org.springframework.messaging.MessageHeaders;
