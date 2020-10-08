@@ -3,7 +3,7 @@ package rabbit.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import rabbit.models.Person;
+import rabbit.models.PersonDto;
 import rabbit.service.PersonService;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class PersonController {
     PersonService personService;
 
     @GetMapping("/people")
-    public List<Person> getPeople() {
+    public List<PersonDto> getPeople() {
         return personService.getPeople();
     }
 

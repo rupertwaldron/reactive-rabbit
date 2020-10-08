@@ -2,7 +2,7 @@ package rabbit.repository;
 
 
 import org.springframework.stereotype.Repository;
-import rabbit.models.Person;
+import rabbit.models.PersonDto;
 
 
 import java.util.ArrayList;
@@ -10,13 +10,13 @@ import java.util.List;
 
 @Repository
 public class PeopleRepository {
-    private List<Person> people = new ArrayList<>();
+    private List<PersonDto> people = new ArrayList<>();
 
-    public synchronized void add(Person person) {
-        people.add(person);
+    public synchronized void add(PersonDto personDTO) {
+        people.add(personDTO);
     }
 
-    public List<Person> getAll() {
+    public List<PersonDto> getAll() {
         return people;
     }
 

@@ -9,12 +9,13 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person implements Serializable {
+public class PersonDto implements Serializable {
     private String name;
     private int age;
     private String city;
+    private String creation;
 
-    public Person(int i) {
+    public PersonDto(int i) {
         this.name = "name_" + i;
         this.age = i;
         this.city = "city_" + i;

@@ -1,4 +1,4 @@
-package com.ruppyrup.models;
+package com.ruppyrup.publisher;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,29 +1,33 @@
 package com.ruppyrup.publisher;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
-import com.ruppyrup.models.Person;
 import org.json.simple.JSONObject;
-
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 public class Publisher {
 
     private static final String QUEUE_NAME1 = "aName";
-    public static final int END_INCLUSIVE = 1;
+    public static final int END_INCLUSIVE = 10;
 
     public static void main(String[]args) throws IOException, TimeoutException, InterruptedException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
+
 
         //channel.queueDeclare(QUEUE_NAME1, true, false, false, null);
 
@@ -44,7 +48,11 @@ public class Publisher {
                 })
                 .forEach(personBytes -> {
             try {
-                channel.basicPublish("", QUEUE_NAME1, null, personBytes);
+                String now = LocalDateTime.now().toString();
+                Map<String, Object> headers = Map.of("sendTime", now);
+
+                AMQP.BasicProperties build = new AMQP.BasicProperties.Builder().headers(headers).build();
+                channel.basicPublish("", QUEUE_NAME1, build, personBytes);
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -1,7 +1,7 @@
 apply plugin: 'application'
 
 dependencies {
-    compile project(':rabbit-model')
+
 }
 
 mainClassName = 'com.ruppyrup.publisher.Publisher'

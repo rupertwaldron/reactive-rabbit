@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import rabbit.models.Person;
+import rabbit.models.PersonDto;
 import rabbit.repository.PeopleRepository;
 
 import java.time.Duration;
@@ -19,13 +19,13 @@ public class PersonService {
     @Autowired
     PeopleRepository peopleRepository;
 
-    public void addPerson(Person person) {
+    public void addPerson(PersonDto personDTO) {
         if (peopleRepository.getAll().size() == 0) start = Instant.now();
         if (peopleRepository.getAll().size() == 1000 - 1) finish = Instant.now();
-        peopleRepository.add(person);
+        peopleRepository.add(personDTO);
     }
 
-    public List<Person> getPeople() {
+    public List<PersonDto> getPeople() {
         return peopleRepository.getAll();
     }
 
