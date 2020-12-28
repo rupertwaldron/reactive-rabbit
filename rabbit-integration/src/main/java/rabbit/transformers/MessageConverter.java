@@ -30,6 +30,17 @@ public class MessageConverter {
         return objectMapper.readValue(payload, PersonDto.class);
     }
 
+    public PersonDto extractReactiveObject(byte[] event) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PersonDto person = null;
+        try {
+            person = objectMapper.readValue(event, PersonDto.class);
+        } catch (IOException ex) {
+            System.out.println("Can't convert object to PersonDto");
+        }
+        return person;
+    }
+
     public PersonDto extractPerson(MessageDto messageDto) {
         PersonDto personDTO = messageDto.getPersonDTO();
         String creationTime = (String) messageDto.getHeaders().get("sendTime");

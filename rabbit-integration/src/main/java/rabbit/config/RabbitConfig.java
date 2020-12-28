@@ -30,84 +30,84 @@ import java.util.concurrent.Executor;
 
 @Configuration
 public class RabbitConfig {
-    private static final String INCOMING_MESSAGE_CHANNEL = "incoming_message_channel";
-private static final String ENRICHMENT_MESSAGE_CHANNEL = "enrichment_message_channel";
-    private static int personCount;
-
-    @Autowired
-    PersonService personService;
-
-    @Autowired
-    MessageConverter messageConverter;
-
+//    private static final String INCOMING_MESSAGE_CHANNEL = "incoming_message_channel";
+//private static final String ENRICHMENT_MESSAGE_CHANNEL = "enrichment_message_channel";
+//    private static int personCount;
+//
 //    @Autowired
-//    ConnectionFactory rabbitConnectionFactory;
-
-    @Bean(name = INCOMING_MESSAGE_CHANNEL)
-    public MessageChannel getMessageChannel() {
-        return MessageChannels.direct().get();
-    }
-
-
+//    PersonService personService;
+//
+//    @Autowired
+//    MessageConverter messageConverter;
+//
+////    @Autowired
+////    ConnectionFactory rabbitConnectionFactory;
+//
+//    @Bean(name = INCOMING_MESSAGE_CHANNEL)
+//    public MessageChannel getMessageChannel() {
+//        return MessageChannels.direct().get();
+//    }
+//
+//
+////    @Bean
+////    public IntegrationFlow amqpInbound() {
+////        return IntegrationFlows.from(Amqp.inboundAdapter(workListenerContainer()))
+////                .log(LoggingHandler.Level.INFO)
+////                .transform(messageConverter, "extractObject")
+////                .log(LoggingHandler.Level.INFO)
+////                .channel(INCOMING_MESSAGE_CHANNEL)
+////                .get();
+////    }
+//
 //    @Bean
-//    public IntegrationFlow amqpInbound() {
-//        return IntegrationFlows.from(Amqp.inboundAdapter(workListenerContainer()))
-//                .log(LoggingHandler.Level.INFO)
-//                .transform(messageConverter, "extractObject")
-//                .log(LoggingHandler.Level.INFO)
-//                .channel(INCOMING_MESSAGE_CHANNEL)
+//    public Publisher<Message<PersonDto>> amqpInbound(ConnectionFactory rabbitConnectionFactory) {
+//        return IntegrationFlows.from(Amqp.inboundAdapter(rabbitConnectionFactory, "aName"))
+//                .transform(messageConverter, "wrapHeaders")
+//                .transform(messageConverter, "extractPerson")
+//                .log()
+//                .toReactivePublisher();
+//
+////                .log(LoggingHandler.Level.INFO)
+////                .channel(INCOMING_MESSAGE_CHANNEL)
+////                .get();
+//    }
+//
+//
+//    @Bean
+//    public IntegrationFlow processMessage() {
+//        return IntegrationFlows.from(INCOMING_MESSAGE_CHANNEL)
+//                .transform(Message.class, m -> {
+//                    ((PersonDto) m.getPayload()).setAge(20);
+//                    return m;
+//                })
+//                .transform(messageConverter, "changeAge")
+//                .channel(ENRICHMENT_MESSAGE_CHANNEL)
+////                .transform(messageConverter, "enrichObject") //need to run Chunky on 8088
+////                .handle(m -> personService.addPerson((Person) m.getPayload()))
 //                .get();
 //    }
-
-    @Bean
-    public Publisher<Message<PersonDto>> amqpInbound(ConnectionFactory rabbitConnectionFactory) {
-        return IntegrationFlows.from(Amqp.inboundAdapter(rabbitConnectionFactory, "aName"))
-                .transform(messageConverter, "wrapHeaders")
-                .transform(messageConverter, "extractPerson")
-                .log()
-                .toReactivePublisher();
-
+//
+//    @Bean
+//    public IntegrationFlow enrichmentFlow() {
+//        return IntegrationFlows.from(ENRICHMENT_MESSAGE_CHANNEL)
+//                .transform(messageConverter, "enrichObject")
 //                .log(LoggingHandler.Level.INFO)
-//                .channel(INCOMING_MESSAGE_CHANNEL)
+//                .handle(m -> personService.addPerson((PersonDto) m.getPayload()))
 //                .get();
-    }
-
-
-    @Bean
-    public IntegrationFlow processMessage() {
-        return IntegrationFlows.from(INCOMING_MESSAGE_CHANNEL)
-                .transform(Message.class, m -> {
-                    ((PersonDto) m.getPayload()).setAge(20);
-                    return m;
-                })
-                .transform(messageConverter, "changeAge")
-                .channel(ENRICHMENT_MESSAGE_CHANNEL)
-//                .transform(messageConverter, "enrichObject") //need to run Chunky on 8088
-//                .handle(m -> personService.addPerson((Person) m.getPayload()))
-                .get();
-    }
-
-    @Bean
-    public IntegrationFlow enrichmentFlow() {
-        return IntegrationFlows.from(ENRICHMENT_MESSAGE_CHANNEL)
-                .transform(messageConverter, "enrichObject")
-                .log(LoggingHandler.Level.INFO)
-                .handle(m -> personService.addPerson((PersonDto) m.getPayload()))
-                .get();
-    }
-
-
-
-
-    @Bean(name = ENRICHMENT_MESSAGE_CHANNEL)
-    public ExecutorChannel enrichmentChannel() {
-        return new ExecutorChannel(getAsyncExecutor());
-    }
-
-    @Bean
-    public Executor getAsyncExecutor() {
-        return new SimpleAsyncTaskExecutor();
-    }
+//    }
+//
+//
+//
+//
+//    @Bean(name = ENRICHMENT_MESSAGE_CHANNEL)
+//    public ExecutorChannel enrichmentChannel() {
+//        return new ExecutorChannel(getAsyncExecutor());
+//    }
+//
+//    @Bean
+//    public Executor getAsyncExecutor() {
+//        return new SimpleAsyncTaskExecutor();
+//    }
 
 
 //    @Bean
@@ -122,10 +122,10 @@ private static final String ENRICHMENT_MESSAGE_CHANNEL = "enrichment_message_cha
 //        return container;
 //    }
 
-    @Bean
-    public Queue worksQueue() {
-        return QueueBuilder.durable("aName")
-                .build();
-    }
+//    @Bean
+//    public Queue worksQueue() {
+//        return QueueBuilder.durable("aName")
+//                .build();
+//    }
 
 }
