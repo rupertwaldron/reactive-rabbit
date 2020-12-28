@@ -1,0 +1,6 @@
+apply plugin: 'application'
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+}
+
+mainClassName = 'rabbit.RabbitApplication'
