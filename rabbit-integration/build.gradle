@@ -2,8 +2,11 @@ apply plugin: 'application'
 dependencies {
     implementation 'org.springframework.integration:spring-integration-amqp'
     implementation 'org.springframework.boot:spring-boot-starter-integration'
+    implementation 'org.springframework.boot:spring-boot-starter-rsocket'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.integration:spring-integration-test'
+    implementation 'io.projectreactor:reactor-tools'
 }
 
 mainClassName = 'rabbit.RabbitApplication'

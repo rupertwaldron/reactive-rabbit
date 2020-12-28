@@ -1,14 +1,17 @@
 package rabbit.config;
 
 
+import org.reactivestreams.Publisher;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.integration.amqp.dsl.Amqp;
+import org.springframework.integration.amqp.dsl.AmqpInboundChannelAdapterSMLCSpec;
 import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -16,9 +19,12 @@ import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.rsocket.RSocketRequester;
 import rabbit.models.PersonDto;
 import rabbit.service.PersonService;
 import rabbit.transformers.MessageConverter;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.Executor;
 
@@ -54,14 +60,16 @@ private static final String ENRICHMENT_MESSAGE_CHANNEL = "enrichment_message_cha
 //    }
 
     @Bean
-    public IntegrationFlow amqpInbound(ConnectionFactory rabbitConnectionFactory) {
+    public Publisher<Message<PersonDto>> amqpInbound(ConnectionFactory rabbitConnectionFactory) {
         return IntegrationFlows.from(Amqp.inboundAdapter(rabbitConnectionFactory, "aName"))
-                .log(LoggingHandler.Level.INFO)
                 .transform(messageConverter, "wrapHeaders")
                 .transform(messageConverter, "extractPerson")
-                .log(LoggingHandler.Level.INFO)
-                .channel(INCOMING_MESSAGE_CHANNEL)
-                .get();
+                .log()
+                .toReactivePublisher();
+
+//                .log(LoggingHandler.Level.INFO)
+//                .channel(INCOMING_MESSAGE_CHANNEL)
+//                .get();
     }
 
 
