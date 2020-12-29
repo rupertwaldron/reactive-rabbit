@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class ReactiveController {
@@ -20,6 +21,11 @@ public class ReactiveController {
     }
 
     private PersonDto tokenize(PersonDto personDto) {
+        try {
+            TimeUnit.SECONDS.sleep((long) (Math.random() * 2L));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         var name = personDto.getName();
         personDto.setName("***" + name + "***");
         return personDto;

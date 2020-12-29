@@ -25,8 +25,8 @@ public class TokenizerController {
 
     @GetMapping("/person")
     public String getId(@RequestParam("id") String id) throws InterruptedException {
-        //TimeUnit.SECONDS.sleep((long) (Math.random() * 2L));
-        TimeUnit.MILLISECONDS.sleep(100L);
+        TimeUnit.SECONDS.sleep((long) (Math.random() * 2L));
+//        TimeUnit.MILLISECONDS.sleep(100L);
         System.out.println("Start service request: " + id);
         return tokenize(id);
     }

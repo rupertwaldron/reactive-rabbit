@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import rabbit.models.PersonDto;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class StarService {
@@ -15,7 +16,7 @@ public class StarService {
 
     public StarService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
-                .baseUrl("http://localhost:8089")
+                .baseUrl("http://localhost:8088")
                 .build();
     }
 
@@ -30,11 +31,17 @@ public class StarService {
         return response.getBody();
     }
 
-    public Flux<PersonDto> getWebClientStars(Flux<PersonDto> personDtoFlux) {
+    public Mono<PersonDto> getWebClientStars(PersonDto personDto) {
         return webClient.get()
-                .uri("/stars")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/stars")
+                        .queryParam("id", personDto.getName())
+                        .build())
                 .retrieve()
-                .bodyToFlux(PersonDto.class);
-
+                .bodyToMono(String.class)
+                .map(id -> {
+                    personDto.setName(id);
+                    return personDto;
+                });
     }
 }

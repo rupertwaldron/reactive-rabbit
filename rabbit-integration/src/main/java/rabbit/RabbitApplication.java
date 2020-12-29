@@ -17,6 +17,7 @@ import rabbit.service.PersonService;
 import rabbit.service.StarService;
 import rabbit.transformers.MessageConverter;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 import reactor.rabbitmq.RabbitFlux;
 import reactor.rabbitmq.ReceiverOptions;
@@ -67,62 +68,34 @@ public class RabbitApplication implements CommandLineRunner {
                 .connectionFactory(factory)
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
 
-        Flux<Delivery> inboundFlux = RabbitFlux.createReceiver(receiverOptions)
-                .consumeNoAck(QUEUE_NAME);
+        ParallelFlux<PersonDto> parallelFlux = RabbitFlux.createReceiver(receiverOptions)
+                .consumeNoAck(QUEUE_NAME)
+                .parallel()
+                .map(message -> messageConverter.extractReactiveObject(message.getBody()));
 
-        inboundFlux
-                .map(message -> messageConverter.extractReactiveObject(message.getBody()))
-                .subscribe(person -> System.out.println("Reactive Received :: " + person));
+//                parallelFlux
+//                .flatMap(personDto -> starService.getWebClientStars(personDto))
+//                .doOnNext(personService::addPerson)
+//                .subscribe(personDto -> System.out.println("Person :: " + personDto));
 
-//        com.rabbitmq.client.ConnectionFactory factory = new ConnectionFactory();
-//        factory.setHost("localhost");
-//        Connection connection = factory.newConnection();
-//        Channel channel = connection.createChannel();
-//
-//        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-//            String message = new String(delivery.getBody(), "UTF-8");
-//            System.out.println(" [x] Received '" + message + "'");
-//        };
-//
-//        channel.basicConsume(QUEUE_NAME, true, deliverCallback, consumerTag -> { });
 
-        //channel.queueDeclare(QUEUE_NAME1, true, false, false, null);
+        rSocketRequester
+                .route("person.stars")
+                .data(parallelFlux)
+                .retrieveFlux(PersonDto.class)
+                .map(personDto -> {
+                    personDto.setAge(15);
+                    return personDto;
+                })
+                .doOnNext(personService::addPerson)
+                .subscribe(personDto -> System.out.println("Person :: " + personDto));
 
-//        Instant start = Instant.now();
-//        IntStream.rangeClosed(1, END_INCLUSIVE)
-//                .mapToObj(Person::new)
-//                .map(person -> {
-//                    try {
-//                        JSONObject object = new JSONObject();
-//                        object.put("name", person.getName());
-//                        object.put("age", person.getAge());
-//                        object.put("city", person.getCity());
-//                        return object.toJSONString().getBytes();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                    return new byte[0];
-//                })
-//                .forEach(personBytes -> {
-//                    try {
-//                        String now = LocalDateTime.now().toString();
-//                        Map<String, Object> headers = Map.of("sendTime", now);
-//
-//                        AMQP.BasicProperties build = new AMQP.BasicProperties.Builder().headers(headers).build();
-//                        channel.basicPublish("", QUEUE_NAME1, build, personBytes);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                    System.out.println(" [x] Sent '" + new String(personBytes) + "'");
-//                });
-//
-//        Instant finish = Instant.now();
-//
-//        System.out.println("Time to publish = " + Duration.between(start, finish).toMillis());
 
-//        channel.close();
-//        connection.close();
 
+
+//        inboundFlux
+//                .map(message -> messageConverter.extractReactiveObject(message.getBody()))
+//                .subscribe(person -> System.out.println("Reactive Received :: " + person));
 
 
 
