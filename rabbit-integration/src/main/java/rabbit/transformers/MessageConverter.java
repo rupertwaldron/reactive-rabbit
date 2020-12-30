@@ -12,6 +12,7 @@ import rabbit.models.PersonDto;
 import rabbit.service.StarService;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class MessageConverter {
@@ -29,6 +30,11 @@ public class MessageConverter {
         ObjectMapper objectMapper = new ObjectMapper();
         String payload = new String(event.getPayload());
         return objectMapper.readValue(payload, PersonDto.class);
+    }
+
+    public boolean checkForEOD(Delivery delivery) {
+        Object endOfDayTime = delivery.getProperties().getHeaders().get("endOfDayTime");
+        return endOfDayTime != null;
     }
 
     public PersonDto extractReactiveObject(Delivery delivery) {

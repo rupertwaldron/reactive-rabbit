@@ -1,6 +1,7 @@
 package rabbit;
 
 import com.rabbitmq.client.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,11 +10,13 @@ import rabbit.models.PersonDto;
 import rabbit.service.PersonService;
 import rabbit.service.StarService;
 import rabbit.transformers.MessageConverter;
+import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 import reactor.rabbitmq.RabbitFlux;
 import reactor.rabbitmq.ReceiverOptions;
 
+@Slf4j
 @SpringBootApplication
 @EnableAsync
 public class RabbitApplication implements CommandLineRunner {
@@ -49,18 +52,29 @@ public class RabbitApplication implements CommandLineRunner {
                 .connectionFactory(factory)
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
 
-        Flux<PersonDto> parallelFlux = RabbitFlux.createReceiver(receiverOptions)
+        ConnectableFlux<Delivery> rabbitFlux = RabbitFlux.createReceiver(receiverOptions)
                 .consumeNoAck(QUEUE_NAME)
-                .map(messageConverter::extractReactiveObject);
+                .publish();
 
-        parallelFlux
+
+
+        rabbitFlux
+                .filter(messageConverter::checkForEOD)
+                .subscribe(message -> log.info("End of day found"));
+
+        rabbitFlux
+                .filter(delivery -> !messageConverter.checkForEOD(delivery))
+                .map(messageConverter::extractReactiveObject)
                 .flatMap(starService::getWebClientStars)
                 .map(personDto -> {
                     personDto.setAge(15);
+
                     return personDto;
                 })
                 .flatMap(personService::addPerson)
                 .subscribe(personDto -> System.out.println("Person :: " + personDto));
+
+        rabbitFlux.connect(); // need this else nothing works
 
 
 //        rSocketRequester
