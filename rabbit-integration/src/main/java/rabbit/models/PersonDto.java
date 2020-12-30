@@ -21,6 +21,14 @@ public class PersonDto implements Serializable {
     private String creation;
     private String savation;
 
+    public PersonDto(String name, int age, String city, String creation, String savation) {
+        this.name = name;
+        this.age = age;
+        this.city = city;
+        this.creation = creation;
+        this.savation = savation;
+    }
+
     public PersonDto(int i) {
         this.name = "name_" + i;
         this.age = i;

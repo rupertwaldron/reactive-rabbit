@@ -12,6 +12,8 @@ import rabbit.models.PersonDto;
 import rabbit.service.StarService;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Service
@@ -35,6 +37,13 @@ public class MessageConverter {
     public boolean checkForEOD(Delivery delivery) {
         Object endOfDayTime = delivery.getProperties().getHeaders().get("endOfDayTime");
         return endOfDayTime != null;
+    }
+
+    public LocalDateTime getEODTime(Delivery delivery) {
+        final DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        String endOfDayTime = delivery.getProperties().getHeaders().get("endOfDayTime").toString();
+        return LocalDateTime.parse(endOfDayTime, formatter);
     }
 
     public PersonDto extractReactiveObject(Delivery delivery) {

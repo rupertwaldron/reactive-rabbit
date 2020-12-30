@@ -21,8 +21,7 @@ import java.util.List;
 
 @Service
 public class PersonService {
-    private Instant start = Instant.now();
-    private Instant finish = Instant.now();
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
     
     private final PersonRepository personRepository;
 
@@ -39,9 +38,6 @@ public class PersonService {
     }
 
     public Long getTime() {
-        final DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-
         Flux<PersonDto> lastPerson = personRepository
                 .findAll(Sort.by("savation"))
                 .takeLast(1);
@@ -56,11 +52,20 @@ public class PersonService {
         return map.blockLast();
     }
 
+    public Flux<PersonDto> collectEODPeople(LocalDateTime eod) {
+        return getPeople()
+                .filter(personDto -> LocalDateTime.parse(personDto.getCreation(), formatter).isBefore(eod));
+    }
+
     public Long getCount() {
         return personRepository.findAll().count().block();
     }
 
     public Mono<Void> clearAll() {
         return personRepository.deleteAll();
+    }
+
+    public Mono<Void> deleteById(String id) {
+        return personRepository.deleteById(id);
     }
 }

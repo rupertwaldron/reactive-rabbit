@@ -44,6 +44,8 @@ public class RabbitApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        personService.deleteById("5fecd3094ec4ba046ad85d4e");
+
         ConnectionFactory factory = new ConnectionFactory();
         factory.useNio();
         factory.setHost("localhost");
@@ -56,11 +58,13 @@ public class RabbitApplication implements CommandLineRunner {
                 .consumeNoAck(QUEUE_NAME)
                 .publish();
 
-
-
         rabbitFlux
                 .filter(messageConverter::checkForEOD)
-                .subscribe(message -> log.info("End of day found"));
+                .map(messageConverter::getEODTime)
+                .flatMap(personService::collectEODPeople)
+                .map(PersonDto::getId)
+                .doOnNext(personService::deleteById)
+                .subscribe(message -> log.info("People before EOD Deleted"));
 
         rabbitFlux
                 .filter(delivery -> !messageConverter.checkForEOD(delivery))
@@ -72,7 +76,7 @@ public class RabbitApplication implements CommandLineRunner {
                     return personDto;
                 })
                 .flatMap(personService::addPerson)
-                .subscribe(personDto -> System.out.println("Person :: " + personDto));
+                .subscribe(personDto -> log.info("Person :: " + personDto));
 
         rabbitFlux.connect(); // need this else nothing works
 
