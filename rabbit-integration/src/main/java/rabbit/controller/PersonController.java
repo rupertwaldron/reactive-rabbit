@@ -5,17 +5,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rabbit.models.PersonDto;
 import rabbit.service.PersonService;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 @RestController
 public class PersonController {
 
-    @Autowired
-    PersonService personService;
+    private final PersonService personService;
+
+    public PersonController(PersonService personService) {
+        this.personService = personService;
+    }
 
     @GetMapping("/people")
-    public List<PersonDto> getPeople() {
+    public Flux<PersonDto> getPeople() {
         return personService.getPeople();
     }
 
@@ -25,7 +30,7 @@ public class PersonController {
     }
 
     @GetMapping("/clear")
-    public void clearAllPeople() {
-        personService.clearAll();
+    public Mono<Void> clearAllPeople() {
+        return personService.clearAll();
     }
 }

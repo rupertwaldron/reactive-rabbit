@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 public class Publisher {
 
     private static final String QUEUE_NAME1 = "aName";
-    public static final int END_INCLUSIVE = 10;
+    public static final int END_INCLUSIVE = 10000;
 
     public static void main(String[]args) throws IOException, TimeoutException, InterruptedException {
         ConnectionFactory factory = new ConnectionFactory();

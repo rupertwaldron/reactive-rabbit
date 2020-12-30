@@ -3,6 +3,7 @@ package rabbit.transformers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.rabbitmq.client.Delivery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
@@ -30,11 +31,13 @@ public class MessageConverter {
         return objectMapper.readValue(payload, PersonDto.class);
     }
 
-    public PersonDto extractReactiveObject(byte[] event) {
+    public PersonDto extractReactiveObject(Delivery delivery) {
+        String sendTime = delivery.getProperties().getHeaders().get("sendTime").toString();
         ObjectMapper objectMapper = new ObjectMapper();
         PersonDto person = null;
         try {
-            person = objectMapper.readValue(event, PersonDto.class);
+            person = objectMapper.readValue(delivery.getBody(), PersonDto.class);
+            person.setCreation(sendTime);
         } catch (IOException ex) {
             System.out.println("Can't convert object to PersonDto");
         }
