@@ -12,6 +12,7 @@ import rabbit.service.StarService;
 import rabbit.transformers.MessageConverter;
 import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.rabbitmq.RabbitFlux;
 import reactor.rabbitmq.ReceiverOptions;
@@ -44,8 +45,6 @@ public class RabbitApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        personService.deleteById("5feceb7f98e8a51774f81864").subscribe();
-
         ConnectionFactory factory = new ConnectionFactory();
         factory.useNio();
         factory.setHost("localhost");
@@ -54,31 +53,63 @@ public class RabbitApplication implements CommandLineRunner {
                 .connectionFactory(factory)
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
 
-        ConnectableFlux<Delivery> rabbitFlux = RabbitFlux.createReceiver(receiverOptions)
-                .consumeNoAck(QUEUE_NAME)
-                .publish();
+//        ConnectableFlux<Delivery> rabbitFlux = RabbitFlux.createReceiver(receiverOptions)
+//                .consumeNoAck(QUEUE_NAME)
+//                .publish();
+
+        Flux<Delivery> rabbitFlux = RabbitFlux.createReceiver(receiverOptions)
+                .consumeNoAck(QUEUE_NAME);
+
 
         rabbitFlux
-                .filter(messageConverter::checkForEOD)
-                .map(messageConverter::getEODTime)
-                .flatMap(personService::collectEODPeople)
-                .map(PersonDto::getId)
-                .flatMap(personService::deleteById)
-                .subscribe(message -> log.info("People before EOD Deleted"));
+                .flatMap(delivery -> {
+                    if (messageConverter.checkForEOD(delivery)) {
+                        return Mono.just(delivery)
+                                .map(messageConverter::getEODTime)
+                                .flatMapMany(personService::collectEODPeople)
+                                .log("EOD route")
+                                .map(PersonDto::getId)
+                                .flatMap(personService::deleteById);
+                    } else {
+                        return Mono.just(delivery)
+                                .map(messageConverter::extractReactiveObject)
+                                .flatMapMany(starService::getWebClientStars)
+                                .log("Normal route")
+                                .map(personDto -> {
+                                    personDto.setAge(15);
 
-        rabbitFlux
-                .filter(delivery -> !messageConverter.checkForEOD(delivery))
-                .map(messageConverter::extractReactiveObject)
-                .flatMap(starService::getWebClientStars)
-                .map(personDto -> {
-                    personDto.setAge(15);
-
-                    return personDto;
+                                    return personDto;
+                                })
+                                .flatMap(personService::addPerson);
+                    }
                 })
-                .flatMap(personService::addPerson)
-                .subscribe(personDto -> log.info("Person :: " + personDto));
+                .subscribe(message -> log.info("Finished if else :: " + message));
 
-        rabbitFlux.connect(); // need this else nothing works
+
+//        rabbitFlux
+//                .filter(delivery -> !messageConverter.checkForEOD(delivery))
+//                .log("Message from Normal flow")
+//                .map(messageConverter::extractReactiveObject)
+//                .flatMap(starService::getWebClientStars)
+//                .map(personDto -> {
+//                    personDto.setAge(15);
+//
+//                    return personDto;
+//                })
+//                .flatMap(personService::addPerson)
+//                .subscribe(personDto -> log.info("Person :: " + personDto));
+//
+//        rabbitFlux
+//                .filter(messageConverter::checkForEOD)
+//                .log("Message from EOD flow")
+//                .map(messageConverter::getEODTime)
+//                .flatMap(personService::collectEODPeople)
+//                .map(PersonDto::getId)
+//                .flatMap(personService::deleteById)
+//                .subscribe(message -> log.info("People before EOD Deleted"));
+
+
+//        rabbitFlux.connect(); // need this else nothing works
 
 
 //        rSocketRequester

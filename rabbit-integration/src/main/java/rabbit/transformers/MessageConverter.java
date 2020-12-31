@@ -35,6 +35,7 @@ public class MessageConverter {
     }
 
     public boolean checkForEOD(Delivery delivery) {
+        System.out.println("In EOD " + delivery.getProperties().getHeaders());
         Object endOfDayTime = delivery.getProperties().getHeaders().get("endOfDayTime");
         return endOfDayTime != null;
     }
