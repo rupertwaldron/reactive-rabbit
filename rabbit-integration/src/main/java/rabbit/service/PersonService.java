@@ -1,5 +1,6 @@
 package rabbit.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+@Slf4j
 @Service
 public class PersonService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
@@ -66,6 +68,7 @@ public class PersonService {
     }
 
     public Mono<Void> deleteById(String id) {
+        log.info("Person to be deleted with id :: " + id);
         return personRepository.deleteById(id);
     }
 }

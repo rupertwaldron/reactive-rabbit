@@ -44,7 +44,7 @@ public class RabbitApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        personService.deleteById("5fecd3094ec4ba046ad85d4e");
+        personService.deleteById("5feceb7f98e8a51774f81864").subscribe();
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.useNio();
@@ -63,7 +63,7 @@ public class RabbitApplication implements CommandLineRunner {
                 .map(messageConverter::getEODTime)
                 .flatMap(personService::collectEODPeople)
                 .map(PersonDto::getId)
-                .doOnNext(personService::deleteById)
+                .flatMap(personService::deleteById)
                 .subscribe(message -> log.info("People before EOD Deleted"));
 
         rabbitFlux
