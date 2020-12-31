@@ -1,6 +1,6 @@
 package rabbit;
 
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.ConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -10,11 +10,10 @@ import rabbit.models.PersonDto;
 import rabbit.service.PersonService;
 import rabbit.service.StarService;
 import rabbit.transformers.MessageConverter;
-import reactor.core.publisher.ConnectableFlux;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.rabbitmq.RabbitFlux;
+import reactor.rabbitmq.Receiver;
 import reactor.rabbitmq.ReceiverOptions;
 
 @Slf4j
@@ -53,74 +52,33 @@ public class RabbitApplication implements CommandLineRunner {
                 .connectionFactory(factory)
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
 
-//        ConnectableFlux<Delivery> rabbitFlux = RabbitFlux.createReceiver(receiverOptions)
-//                .consumeNoAck(QUEUE_NAME)
-//                .publish();
+        try (Receiver receiver = RabbitFlux.createReceiver(receiverOptions)) {
+            receiver
+                    .consumeAutoAck(QUEUE_NAME)
+                    .flatMap(delivery -> {
+                        if (messageConverter.checkForEOD(delivery)) {
+                            return Mono.just(delivery)
+                                    .map(messageConverter::getEODTime)
+                                    .flatMapMany(personService::collectEODPeople)
+                                    .log("EOD route")
+                                    .map(PersonDto::getId)
+                                    .flatMap(personService::deleteById);
+                        } else {
+                            return Mono.just(delivery)
+                                    .map(messageConverter::extractReactiveObject)
+                                    .flatMapMany(starService::getWebClientStars)
+                                    .log("Normal route")
+                                    .map(personDto -> {
+                                        personDto.setAge(15);
 
-        Flux<Delivery> rabbitFlux = RabbitFlux.createReceiver(receiverOptions)
-                .consumeNoAck(QUEUE_NAME);
-
-
-        rabbitFlux
-                .flatMap(delivery -> {
-                    if (messageConverter.checkForEOD(delivery)) {
-                        return Mono.just(delivery)
-                                .map(messageConverter::getEODTime)
-                                .flatMapMany(personService::collectEODPeople)
-                                .log("EOD route")
-                                .map(PersonDto::getId)
-                                .flatMap(personService::deleteById);
-                    } else {
-                        return Mono.just(delivery)
-                                .map(messageConverter::extractReactiveObject)
-                                .flatMapMany(starService::getWebClientStars)
-                                .log("Normal route")
-                                .map(personDto -> {
-                                    personDto.setAge(15);
-
-                                    return personDto;
-                                })
-                                .flatMap(personService::addPerson);
-                    }
-                })
-                .subscribe(message -> log.info("Finished if else :: " + message));
-
-
-//        rabbitFlux
-//                .filter(delivery -> !messageConverter.checkForEOD(delivery))
-//                .log("Message from Normal flow")
-//                .map(messageConverter::extractReactiveObject)
-//                .flatMap(starService::getWebClientStars)
-//                .map(personDto -> {
-//                    personDto.setAge(15);
-//
-//                    return personDto;
-//                })
-//                .flatMap(personService::addPerson)
-//                .subscribe(personDto -> log.info("Person :: " + personDto));
-//
-//        rabbitFlux
-//                .filter(messageConverter::checkForEOD)
-//                .log("Message from EOD flow")
-//                .map(messageConverter::getEODTime)
-//                .flatMap(personService::collectEODPeople)
-//                .map(PersonDto::getId)
-//                .flatMap(personService::deleteById)
-//                .subscribe(message -> log.info("People before EOD Deleted"));
-
-
-//        rabbitFlux.connect(); // need this else nothing works
-
-
-//        rSocketRequester
-//                .route("person.stars")
-//                .data(parallelFlux)
-//                .retrieveFlux(PersonDto.class)
-//                .map(personDto -> {
-//                    personDto.setAge(15);
-//                    return personDto;
-//                })
-//                .doOnNext(personService::addPerson)
-//                .subscribe(personDto -> System.out.println("Person :: " + personDto));
+                                        return personDto;
+                                    })
+                                    .flatMap(personService::addPerson);
+                        }
+                    })
+                    .subscribe(message -> log.info("Finished if else :: " + message));
+        } catch (Exception ex) {
+            log.error(ex.getLocalizedMessage());
+        }
     }
 }

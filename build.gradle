@@ -34,8 +34,8 @@ subprojects {
         }
     }
 
-    sourceCompatibility = '14'
-    targetCompatibility = '14'
+    sourceCompatibility = '15'
+    targetCompatibility = '15'
 
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-amqp'

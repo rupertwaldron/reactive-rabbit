@@ -6,7 +6,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import rabbit.models.PersonDto;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -18,17 +17,6 @@ public class StarService {
         this.webClient = webClientBuilder
                 .baseUrl("http://localhost:8088")
                 .build();
-    }
-
-    private RestTemplate restTemplate = new RestTemplate();
-
-    public String getStars(String id) {
-        UriComponentsBuilder uriComponents = UriComponentsBuilder
-                .fromHttpUrl("http://localhost:8088")
-                .path("person")
-                .queryParam("id", id);
-        ResponseEntity<String> response = restTemplate.getForEntity(uriComponents.toUriString(), String.class);
-        return response.getBody();
     }
 
     public Mono<PersonDto> getWebClientStars(PersonDto personDto) {
