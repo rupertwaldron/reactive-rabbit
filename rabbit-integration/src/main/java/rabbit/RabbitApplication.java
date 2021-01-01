@@ -16,6 +16,13 @@ import reactor.rabbitmq.RabbitFlux;
 import reactor.rabbitmq.Receiver;
 import reactor.rabbitmq.ReceiverOptions;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
 @Slf4j
 @SpringBootApplication
 @EnableAsync
@@ -44,6 +51,8 @@ public class RabbitApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        Path path = Paths.get("person_out.txt");
+
         ConnectionFactory factory = new ConnectionFactory();
         factory.useNio();
         factory.setHost("localhost");
@@ -53,6 +62,7 @@ public class RabbitApplication implements CommandLineRunner {
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
 
         try (Receiver receiver = RabbitFlux.createReceiver(receiverOptions)) {
+
             receiver
                     .consumeAutoAck(QUEUE_NAME)
                     .flatMap(delivery -> {
@@ -61,6 +71,13 @@ public class RabbitApplication implements CommandLineRunner {
                                     .map(messageConverter::getEODTime)
                                     .flatMapMany(personService::collectEODPeople)
                                     .log("EOD route")
+                                    .doOnNext(person -> {
+                                        try {
+                                            Files.writeString(path, person.toString(), StandardOpenOption.APPEND);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    })
                                     .map(PersonDto::getId)
                                     .flatMap(personService::deleteById);
                         } else {
@@ -70,7 +87,6 @@ public class RabbitApplication implements CommandLineRunner {
                                     .log("Normal route")
                                     .map(personDto -> {
                                         personDto.setAge(15);
-
                                         return personDto;
                                     })
                                     .flatMap(personService::addPerson);
