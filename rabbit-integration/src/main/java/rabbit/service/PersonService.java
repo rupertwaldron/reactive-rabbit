@@ -24,7 +24,7 @@ public class PersonService {
     }
 
     public Mono<PersonDto> addPerson(PersonDto personDTO) {
-        personDTO.setSavation(LocalDateTime.now().toString());
+        personDTO.setSavation(LocalDateTime.now().format(formatter));
         return personRepository.save(personDTO);
     }
     public Flux<PersonDto> getPeople() {
@@ -60,7 +60,7 @@ public class PersonService {
     }
 
     public Mono<Void> deleteById(String id) {
-        log.info("Person to be deleted with id :: " + id);
+//        log.info("Person to be deleted with id :: " + id);
         return personRepository.deleteById(id);
     }
 }

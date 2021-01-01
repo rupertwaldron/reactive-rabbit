@@ -70,10 +70,10 @@ public class RabbitApplication implements CommandLineRunner {
                             return Mono.just(delivery)
                                     .map(messageConverter::getEODTime)
                                     .flatMapMany(personService::collectEODPeople)
-                                    .log("EOD route")
+//                                    .log("EOD route")
                                     .doOnNext(person -> {
                                         try {
-                                            Files.writeString(path, person.toString(), StandardOpenOption.APPEND);
+                                            Files.writeString(path, person.toString() + "\n", StandardOpenOption.APPEND, StandardOpenOption.CREATE);
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
@@ -84,7 +84,7 @@ public class RabbitApplication implements CommandLineRunner {
                             return Mono.just(delivery)
                                     .map(messageConverter::extractReactiveObject)
                                     .flatMapMany(starService::getWebClientStars)
-                                    .log("Normal route")
+//                                    .log("Normal route")
                                     .map(personDto -> {
                                         personDto.setAge(15);
                                         return personDto;

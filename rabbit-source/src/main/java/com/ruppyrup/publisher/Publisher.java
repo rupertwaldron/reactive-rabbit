@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
@@ -19,7 +20,8 @@ import java.util.stream.IntStream;
 public class Publisher {
 
     private static final String QUEUE_NAME1 = "aName";
-    public static final int END_INCLUSIVE = 10;
+    public static final int END_INCLUSIVE = 10_000;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
     public static void main(String[]args) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
@@ -44,7 +46,7 @@ public class Publisher {
                     })
                     .forEach(personBytes -> {
                         try {
-                            String now = LocalDateTime.now().toString();
+                            String now = LocalDateTime.now().format(formatter);
                             Map<String, Object> headers = Map.of("sendTime", now);
 
                             AMQP.BasicProperties build = new AMQP.BasicProperties.Builder().headers(headers).build();
