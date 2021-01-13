@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 public class Publisher {
 
     private static final String QUEUE_NAME1 = "aName";
-    public static final int END_INCLUSIVE = 10_000;
+    public static final int END_INCLUSIVE = 10_0;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
     public static void main(String[]args) throws IOException, TimeoutException {
