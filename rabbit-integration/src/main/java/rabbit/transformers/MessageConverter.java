@@ -10,6 +10,7 @@ import rabbit.models.PersonDto;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -28,7 +29,8 @@ public class MessageConverter {
     }
 
     public PersonDto extractReactiveObject(Delivery delivery) {
-        String sendTime = delivery.getProperties().getHeaders().get("sendTime").toString();
+        Object sendObject = Optional.ofNullable(delivery.getProperties().getHeaders().get("sendTime")).orElseThrow();
+        String sendTime = sendObject.toString();
         ObjectMapper objectMapper = new ObjectMapper();
         PersonDto person = null;
         try {

@@ -83,6 +83,7 @@ public class RabbitApplication implements CommandLineRunner {
                         } else {
                             return Mono.just(delivery)
                                     .map(messageConverter::extractReactiveObject)
+                                    .onErrorContinue(((throwable, o) -> log.error("Processing error on object ::" + o)))
                                     .flatMapMany(starService::getWebClientStars)
 //                                    .log("Normal route")
                                     .map(personDto -> {
