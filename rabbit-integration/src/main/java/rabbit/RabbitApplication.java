@@ -12,9 +12,7 @@ import rabbit.service.StarService;
 import rabbit.transformers.MessageConverter;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.rabbitmq.RabbitFlux;
-import reactor.rabbitmq.Receiver;
-import reactor.rabbitmq.ReceiverOptions;
+import reactor.rabbitmq.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -61,7 +59,14 @@ public class RabbitApplication implements CommandLineRunner {
                 .connectionFactory(factory)
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
 
-        try (Receiver receiver = RabbitFlux.createReceiver(receiverOptions)) {
+        SenderOptions senderOptions = new SenderOptions()
+                .connectionFactory(factory)
+                .connectionSubscriptionScheduler(Schedulers.boundedElastic());
+
+//        final Sender sender = RabbitFlux.createSender(senderOptions);
+
+        try (Receiver receiver = RabbitFlux.createReceiver(receiverOptions);
+             Sender sender = RabbitFlux.createSender(senderOptions) ) {
 
             receiver
                     .consumeAutoAck(QUEUE_NAME)
@@ -83,7 +88,10 @@ public class RabbitApplication implements CommandLineRunner {
                         } else {
                             return Mono.just(delivery)
                                     .map(messageConverter::extractReactiveObject)
-                                    .onErrorContinue(((throwable, o) -> log.error("Processing error on object ::" + o)))
+                                    .onErrorContinue(((throwable, o) -> {
+                                        log.error("Processing error on object ::" + o);
+//                                        sender.pub
+                                    }))
                                     .flatMapMany(starService::getWebClientStars)
 //                                    .log("Normal route")
                                     .map(personDto -> {
