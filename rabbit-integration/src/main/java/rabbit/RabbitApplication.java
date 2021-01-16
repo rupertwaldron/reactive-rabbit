@@ -85,7 +85,9 @@ public class RabbitApplication implements CommandLineRunner {
                                     .map(messageConverter::extractReactiveObject)
                                     .onErrorContinue(((throwable, o) -> {
                                         log.error("Processing error on object ::" + o);
+                                        delivery.nack(false);
                                     }))
+                                    .doOnSuccess(person -> delivery.ack())
                                     .flatMapMany(starService::getWebClientStars)
 //                                    .log("Normal route")
                                     .map(personDto -> {
@@ -94,7 +96,7 @@ public class RabbitApplication implements CommandLineRunner {
                                     })
                                     .flatMap(personService::addPerson);
                         }
-                        delivery.ack();
+//                        delivery.ack();
                         return personDtoFlux;
                     })
                     .subscribe(message -> log.info("Finished if else :: " + message));

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 public class Error {
-    private static final String QUEUE_NAME1 = "aName";
+    private static final String QUEUE_NAME1 = "myqueue1";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
     public static void main(String[]args) throws IOException, TimeoutException {
