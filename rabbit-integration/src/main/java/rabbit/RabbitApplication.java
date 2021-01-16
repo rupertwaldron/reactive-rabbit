@@ -48,10 +48,29 @@ public class RabbitApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 
         Path path = Paths.get("person_out.txt");
 
+        ReceiverOptions receiverOptions = getReceiverOptions();
+
+        try (Receiver receiver = RabbitFlux.createReceiver(receiverOptions)) {
+            receiver
+                    .consumeManualAck(QUEUE_NAME)
+                    .flatMap(delivery -> {
+                        if (messageConverter.checkForEOD(delivery)) {
+                            return processEndOfDay(path, delivery);
+                        } else {
+                            return processPersonMessages(delivery);
+                        }
+                    })
+                    .subscribe(message -> log.info("Finished if else :: " + message));
+        } catch (Exception ex) {
+            log.error(ex.getLocalizedMessage());
+        }
+    }
+
+    private ReceiverOptions getReceiverOptions() {
         ConnectionFactory factory = new ConnectionFactory();
         factory.useNio();
         factory.setHost("localhost");
@@ -59,49 +78,38 @@ public class RabbitApplication implements CommandLineRunner {
         ReceiverOptions receiverOptions = new ReceiverOptions()
                 .connectionFactory(factory)
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
+        return receiverOptions;
+    }
 
-        try (Receiver receiver = RabbitFlux.createReceiver(receiverOptions)) {
-            receiver
-                    .consumeManualAck(QUEUE_NAME)
-                    .flatMap(delivery -> {
-                        final Flux<PersonDto> personDtoFlux;
-                        if (messageConverter.checkForEOD(delivery)) {
-                            delivery.ack();
-                            return Mono.just(delivery)
-                                    .map(messageConverter::getEODTime)
-                                    .flatMapMany(personService::collectEODPeople)
-                                    .log("EOD being processed")
-                                    .doOnNext(person -> {
-                                        try {
-                                            Files.writeString(path, person.toString() + "\n", StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    })
-                                    .map(PersonDto::getId)
-                                    .flatMap(personService::deleteById);
-                        } else {
-                            personDtoFlux = Mono.just(delivery)
-                                    .map(messageConverter::extractReactiveObject)
-                                    .onErrorContinue(((throwable, o) -> {
-                                        log.error("Processing error on object ::" + o);
-                                        delivery.nack(false);
-                                    }))
-                                    .doOnSuccess(person -> delivery.ack())
-                                    .flatMapMany(starService::getWebClientStars)
-//                                    .log("Normal route")
-                                    .map(personDto -> {
-                                        personDto.setAge(15);
-                                        return personDto;
-                                    })
-                                    .flatMap(personService::addPerson);
-                        }
-//                        delivery.ack();
-                        return personDtoFlux;
-                    })
-                    .subscribe(message -> log.info("Finished if else :: " + message));
-        } catch (Exception ex) {
-            log.error(ex.getLocalizedMessage());
-        }
+    private Flux<PersonDto> processPersonMessages(AcknowledgableDelivery delivery) {
+        return Mono.just(delivery)
+                .map(messageConverter::extractReactiveObject)
+                .onErrorContinue(((throwable, o) -> {
+                    log.error("Processing error on object ::" + o);
+                    delivery.nack(false);
+                }))
+                .doOnSuccess(person -> delivery.ack())
+                .flatMapMany(starService::getWebClientStars)
+                .map(personDto -> {
+                    personDto.setAge(15);
+                    return personDto;
+                })
+                .flatMap(personService::addPerson);
+    }
+
+    private Flux<Void> processEndOfDay(Path path, AcknowledgableDelivery delivery) {
+        return Mono.just(delivery)
+                .map(messageConverter::getEODTime)
+                .doOnSuccess(person -> delivery.ack())
+                .flatMapMany(personService::collectEODPeople)
+                .doOnNext(person -> {
+                    try {
+                        Files.writeString(path, person.toString() + "\n", StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                })
+                .map(PersonDto::getId)
+                .flatMap(personService::deleteById);
     }
 }
