@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 public class EndOfDay {
-    private static final String QUEUE_NAME1 = "myqueue1";
+    private static final String QUEUE_NAME1 = "myqueue2";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
     public static void main(String[]args) throws IOException, TimeoutException {

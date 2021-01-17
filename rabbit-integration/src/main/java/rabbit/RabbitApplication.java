@@ -27,7 +27,7 @@ import java.nio.file.StandardOpenOption;
 @EnableAsync
 public class RabbitApplication implements CommandLineRunner {
 
-    private static final String QUEUE_NAME = "myqueue1";
+    private static final String QUEUE_NAME = "myqueue2";
 
     private final StarService starService;
 
@@ -75,10 +75,9 @@ public class RabbitApplication implements CommandLineRunner {
         factory.useNio();
         factory.setHost("localhost");
 
-        ReceiverOptions receiverOptions = new ReceiverOptions()
+        return new ReceiverOptions()
                 .connectionFactory(factory)
                 .connectionSubscriptionScheduler(Schedulers.boundedElastic());
-        return receiverOptions;
     }
 
     private Flux<PersonDto> processPersonMessages(AcknowledgableDelivery delivery) {
@@ -88,13 +87,17 @@ public class RabbitApplication implements CommandLineRunner {
                     log.error("Processing error on object ::" + o);
                     delivery.nack(false);
                 }))
-                .doOnSuccess(person -> delivery.ack())
                 .flatMapMany(starService::getWebClientStars)
+                .onErrorContinue(((throwable, o) -> {
+                    log.error("Enrichment error error on object ::" + o);
+                    delivery.nack(false);
+                }))
                 .map(personDto -> {
                     personDto.setAge(15);
                     return personDto;
                 })
-                .flatMap(personService::addPerson);
+                .flatMap(personService::addPerson)
+                .doOnNext(personDto -> delivery.ack());
     }
 
     private Flux<Void> processEndOfDay(Path path, AcknowledgableDelivery delivery) {

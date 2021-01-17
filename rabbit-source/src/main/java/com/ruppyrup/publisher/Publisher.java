@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 @Slf4j
 public class Publisher {
 
-    private static final String QUEUE_NAME1 = "myqueue1";
+    private static final String QUEUE_NAME1 = "myqueue2";
     public static final int END_INCLUSIVE = 10;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 
