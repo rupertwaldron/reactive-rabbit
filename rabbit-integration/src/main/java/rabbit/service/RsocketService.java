@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Service;
 import rabbit.models.PersonDto;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -19,7 +18,7 @@ public class RsocketService {
         return rSocketRequester
                 .route("person.stars")
                 .data(Mono.just(personDto))
-                .retrieveMono(PersonDto.class)
-                .doOnNext(person -> System.out.println("Person enriched :: " + person.getName()));
+                .retrieveMono(PersonDto.class);
+//                .doOnNext(person -> System.out.println("Person enriched :: " + person.getName()));
     }
 }

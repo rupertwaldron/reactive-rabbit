@@ -16,7 +16,7 @@ import java.time.temporal.ChronoUnit;
 @Service
 public class PersonService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-    
+
     private final PersonRepository personRepository;
 
     public PersonService(PersonRepository personRepository) {
@@ -27,6 +27,17 @@ public class PersonService {
         personDTO.setSavation(LocalDateTime.now().format(formatter));
         return personRepository.save(personDTO);
     }
+
+    public Flux<PersonDto> addAllPerson(Flux<PersonDto> personDtoFlux) {
+        final Flux<PersonDto> updatedPersonFlux = personDtoFlux
+                .map(personDto -> {
+                    personDto.setSavation(LocalDateTime.now().format(formatter));
+                    return personDto;
+                });
+        return personRepository.saveAll(updatedPersonFlux);
+    }
+
+
     public Flux<PersonDto> getPeople() {
         return personRepository.findAll();
     }
