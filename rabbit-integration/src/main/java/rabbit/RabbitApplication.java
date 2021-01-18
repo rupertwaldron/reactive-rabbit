@@ -2,12 +2,14 @@ package rabbit;
 
 import com.rabbitmq.client.ConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 import rabbit.models.PersonDto;
 import rabbit.service.PersonService;
+import rabbit.service.RsocketService;
 import rabbit.service.StarService;
 import rabbit.transformers.MessageConverter;
 import reactor.core.publisher.Flux;
@@ -16,7 +18,6 @@ import reactor.core.scheduler.Schedulers;
 import reactor.rabbitmq.*;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,18 +30,21 @@ public class RabbitApplication implements CommandLineRunner {
 
     private static final String QUEUE_NAME = "myqueue2";
 
-    private final StarService starService;
+    private final RsocketService rsocketService;
 
     private final PersonService personService;
 
     private final MessageConverter messageConverter;
 
-    public RabbitApplication(StarService starService,
+    private final StarService starService;
+
+    public RabbitApplication(RsocketService rsocketService,
                              PersonService personService,
-                             MessageConverter messageConverter) {
-        this.starService = starService;
+                             MessageConverter messageConverter, StarService starService) {
+        this.rsocketService = rsocketService;
         this.personService = personService;
         this.messageConverter = messageConverter;
+        this.starService = starService;
     }
 
     public static void main(String[] args) {
@@ -81,13 +85,13 @@ public class RabbitApplication implements CommandLineRunner {
     }
 
     private Flux<PersonDto> processPersonMessages(AcknowledgableDelivery delivery) {
-        return Mono.just(delivery)
+        return Flux.just(delivery)
                 .map(messageConverter::extractReactiveObject)
                 .onErrorContinue(((throwable, o) -> {
                     log.error("Processing error on object ::" + o);
                     delivery.nack(false);
                 }))
-                .flatMapMany(starService::getWebClientStars)
+                .flatMap(starService::getWebClientStars)
                 .onErrorContinue(((throwable, o) -> {
                     log.error("Enrichment error error on object ::" + o);
                     delivery.nack(false);
@@ -101,10 +105,9 @@ public class RabbitApplication implements CommandLineRunner {
     }
 
     private Flux<Void> processEndOfDay(Path path, AcknowledgableDelivery delivery) {
-        return Mono.just(delivery)
+        return Flux.just(delivery)
                 .map(messageConverter::getEODTime)
-                .doOnSuccess(person -> delivery.ack())
-                .flatMapMany(personService::collectEODPeople)
+                .flatMap(personService::collectEODPeople)
                 .doOnNext(person -> {
                     try {
                         Files.writeString(path, person.toString() + "\n", StandardOpenOption.APPEND, StandardOpenOption.CREATE);
@@ -113,6 +116,7 @@ public class RabbitApplication implements CommandLineRunner {
                     }
                 })
                 .map(PersonDto::getId)
+                .doOnNext(id -> delivery.ack())
                 .flatMap(personService::deleteById);
     }
 }
