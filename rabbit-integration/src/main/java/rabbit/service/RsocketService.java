@@ -15,11 +15,11 @@ public class RsocketService {
     @Autowired
     private RSocketRequester rSocketRequester;
 
-    public Mono<PersonDto> rsocketrEnricher(PersonDto personDtoMono) {
+    public Mono<PersonDto> rsocketEnricher(PersonDto personDto) {
         return rSocketRequester
                 .route("person.stars")
-                .data(Mono.just(personDtoMono))
+                .data(Mono.just(personDto))
                 .retrieveMono(PersonDto.class)
-                .doOnNext(personDto -> System.out.println("Person enriched :: " + personDto.getName()));
+                .doOnNext(person -> System.out.println("Person enriched :: " + person.getName()));
     }
 }

@@ -91,7 +91,7 @@ public class RabbitApplication implements CommandLineRunner {
                     log.error("Processing error on object ::" + o);
                     delivery.nack(false);
                 }))
-                .flatMap(starService::getWebClientStars)
+                .flatMap(rsocketService::rsocketEnricher)
                 .onErrorContinue(((throwable, o) -> {
                     log.error("Enrichment error error on object ::" + o);
                     delivery.nack(false);
@@ -102,7 +102,40 @@ public class RabbitApplication implements CommandLineRunner {
                 })
                 .flatMap(personService::addPerson)
                 .doOnNext(personDto -> delivery.ack());
+
+
+//                .flatMap(starService::getWebClientStars)
+//                .onErrorContinue(((throwable, o) -> {
+//                    log.error("Enrichment error error on object ::" + o);
+//                    delivery.nack(false);
+//                }))
+//                .map(personDto -> {
+//                    personDto.setAge(15);
+//                    return personDto;
+//                })
+//                .flatMap(personService::addPerson)
+//                .doOnNext(personDto -> delivery.ack());
     }
+
+//    private Flux<PersonDto> processPersonMessages(AcknowledgableDelivery delivery) {
+//        return Flux.just(delivery)
+//                .map(messageConverter::extractReactiveObject)
+//                .onErrorContinue(((throwable, o) -> {
+//                    log.error("Processing error on object ::" + o);
+//                    delivery.nack(false);
+//                }))
+//                .flatMap(starService::getWebClientStars)
+//                .onErrorContinue(((throwable, o) -> {
+//                    log.error("Enrichment error error on object ::" + o);
+//                    delivery.nack(false);
+//                }))
+//                .map(personDto -> {
+//                    personDto.setAge(15);
+//                    return personDto;
+//                })
+//                .flatMap(personService::addPerson)
+//                .doOnNext(personDto -> delivery.ack());
+//    }
 
     private Flux<Void> processEndOfDay(Path path, AcknowledgableDelivery delivery) {
         return Flux.just(delivery)
