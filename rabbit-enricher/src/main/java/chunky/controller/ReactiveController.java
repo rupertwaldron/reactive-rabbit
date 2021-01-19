@@ -17,9 +17,9 @@ public class ReactiveController {
     @MessageMapping("person.stars")
     public Mono<PersonDto> star(Mono<PersonDto> name){
         return name
-                .map(this::tokenize);
-//                .delayElement(Duration.ofSeconds((long) (Math.random() * 2L)))
-//                .doOnNext(personDto -> log.info("Start service request :: " + personDto.getName()));
+                .map(this::tokenize)
+                .delayElement(Duration.ofSeconds((long) (Math.random() * 2L)))
+                .doOnNext(personDto -> log.info("Start service request :: " + personDto.getName()));
     }
 
     private PersonDto tokenize(PersonDto personDto) {

@@ -25,7 +25,7 @@ import java.nio.file.StandardOpenOption;
 
 @Slf4j
 @SpringBootApplication
-@EnableAsync
+//@EnableAsync
 public class RabbitApplication implements CommandLineRunner {
 
     private static final String QUEUE_NAME = "myqueue2";
@@ -68,8 +68,8 @@ public class RabbitApplication implements CommandLineRunner {
                             return processPersonMessages(delivery);
                         }
                     })
-                    .subscribe();
-//                    .subscribe(message -> log.info("Finished if else :: " + message));
+//                    .subscribe();
+                    .subscribe(message -> log.info("Finished if else :: " + message));
         } catch (Exception ex) {
             log.error(ex.getLocalizedMessage());
         }
@@ -86,7 +86,7 @@ public class RabbitApplication implements CommandLineRunner {
     }
 
     private Flux<PersonDto> processPersonMessages(AcknowledgableDelivery delivery) {
-        final Flux<PersonDto> personDtoFlux = Flux.just(delivery)
+        return Flux.just(delivery)
                 .map(messageConverter::extractReactiveObject)
                 .onErrorContinue(((throwable, o) -> {
                     log.error("Processing error on object ::" + o);
@@ -101,9 +101,10 @@ public class RabbitApplication implements CommandLineRunner {
                     personDto.setAge(15);
                     return personDto;
                 })
+                .flatMap(personService::addPerson)
                 .doOnNext(personDto -> delivery.ack());
 
-        return personService.addAllPerson(personDtoFlux);
+//        return personService.addAllPerson(personDtoFlux);
 
 
 //                .flatMap(starService::getWebClientStars)
