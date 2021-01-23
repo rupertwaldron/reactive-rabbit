@@ -19,7 +19,7 @@ public class ReactiveController {
         return name
                 .map(this::tokenize)
                 .delayElement(Duration.ofSeconds((long) (Math.random() * 2L)))
-                .doOnNext(personDto -> log.info("Start service request :: " + personDto.getName()));
+                .doOnNext(personDto -> log.info("rsocket request :: " + personDto.getName()));
     }
 
     private PersonDto tokenize(PersonDto personDto) {

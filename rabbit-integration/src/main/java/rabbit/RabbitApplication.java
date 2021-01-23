@@ -59,17 +59,20 @@ public class RabbitApplication implements CommandLineRunner {
         ReceiverOptions receiverOptions = getReceiverOptions();
 
         try (Receiver receiver = RabbitFlux.createReceiver(receiverOptions)) {
-            receiver
+            final Flux<AcknowledgableDelivery> acknowledgableDeliveryFlux = receiver
                     .consumeManualAck(QUEUE_NAME)
-                    .flatMap(delivery -> {
-                        if (messageConverter.checkForEOD(delivery)) {
-                            return processEndOfDay(path, delivery);
-                        } else {
-                            return processPersonMessages(delivery);
-                        }
-                    })
-//                    .subscribe();
-                    .subscribe(message -> log.info("Finished if else :: " + message));
+                    .share();
+
+
+            acknowledgableDeliveryFlux
+                    .filter(messageConverter::checkForEOD)
+                    .flatMap(delivery -> processEndOfDay(path, delivery))
+                    .subscribe(message -> log.info("Finished EOD process :: " + message));
+
+            acknowledgableDeliveryFlux
+                    .filter(delivery -> !messageConverter.checkForEOD(delivery))
+                    .flatMap(this::processPersonMessages)
+                    .subscribe(message -> log.info("Finished Person process :: " + message));
         } catch (Exception ex) {
             log.error(ex.getLocalizedMessage());
         }
@@ -92,7 +95,8 @@ public class RabbitApplication implements CommandLineRunner {
                     log.error("Processing error on object ::" + o);
                     delivery.nack(false);
                 }))
-                .flatMap(rsocketService::rsocketEnricher)
+                .flatMap(starService::getWebClientStars)
+//                .flatMap(rsocketService::rsocketEnricher)
                 .onErrorContinue(((throwable, o) -> {
                     log.error("Enrichment error error on object ::" + o);
                     delivery.nack(false);

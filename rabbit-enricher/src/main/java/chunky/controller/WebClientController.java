@@ -14,7 +14,7 @@ public class WebClientController {
     @GetMapping("/stars")
     public String star(@RequestParam("id") String id) throws InterruptedException {
         TimeUnit.SECONDS.sleep((long) (Math.random() * 2L));
-        log.info("Start service request :: " + id);
+        log.info("http request :: " + id);
         return "****" + id + "****";
     }
 
