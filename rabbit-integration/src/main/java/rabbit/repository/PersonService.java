@@ -1,10 +1,8 @@
-package rabbit.service;
+package rabbit.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import rabbit.models.PersonDto;
-import rabbit.repository.PersonRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

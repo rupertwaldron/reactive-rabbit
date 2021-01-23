@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Delivery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import rabbit.models.PersonDto;
+import rabbit.repository.PersonDto;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

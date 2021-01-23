@@ -1,25 +1,24 @@
 package rabbit.service;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
-import rabbit.models.PersonDto;
+import rabbit.repository.PersonDto;
 import reactor.core.publisher.Mono;
 
 @Service
-public class StarService {
+@Profile("webclient")
+public class WebClientService implements Enricher{
 
     private final WebClient webClient;
 
-    public StarService(WebClient.Builder webClientBuilder) {
+    public WebClientService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder
                 .baseUrl("http://localhost:8088")
                 .build();
     }
 
-    public Mono<PersonDto> getWebClientStars(PersonDto personDto) {
+    public Mono<PersonDto> enrich(PersonDto personDto) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/stars")

@@ -1,24 +1,27 @@
 package rabbit.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.stereotype.Service;
-import rabbit.models.PersonDto;
+import rabbit.repository.PersonDto;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
-public class RsocketService {
+@Profile("rsocket")
+public class RsocketService implements Enricher {
 
-    @Autowired
-    private RSocketRequester rSocketRequester;
+    private final RSocketRequester rSocketRequester;
 
-    public Mono<PersonDto> rsocketEnricher(PersonDto personDto) {
+    public RsocketService(RSocketRequester rSocketRequester) {
+        this.rSocketRequester = rSocketRequester;
+    }
+
+    public Mono<PersonDto> enrich(PersonDto personDto) {
         return rSocketRequester
                 .route("person.stars")
                 .data(Mono.just(personDto))
                 .retrieveMono(PersonDto.class);
-//                .doOnNext(person -> System.out.println("Person enriched :: " + person.getName()));
     }
 }

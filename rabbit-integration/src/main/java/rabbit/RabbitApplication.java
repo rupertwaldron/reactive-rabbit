@@ -2,18 +2,15 @@ package rabbit;
 
 import com.rabbitmq.client.ConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableAsync;
-import rabbit.models.PersonDto;
-import rabbit.service.PersonService;
-import rabbit.service.RsocketService;
-import rabbit.service.StarService;
+import rabbit.repository.PersonDto;
+import rabbit.service.Enricher;
+import rabbit.repository.PersonService;
+import rabbit.service.WebClientService;
 import rabbit.transformers.MessageConverter;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.rabbitmq.*;
 
@@ -30,21 +27,18 @@ public class RabbitApplication implements CommandLineRunner {
 
     private static final String QUEUE_NAME = "myqueue2";
 
-    private final RsocketService rsocketService;
-
     private final PersonService personService;
 
     private final MessageConverter messageConverter;
 
-    private final StarService starService;
+    private final Enricher enricherService;
 
-    public RabbitApplication(RsocketService rsocketService,
-                             PersonService personService,
-                             MessageConverter messageConverter, StarService starService) {
-        this.rsocketService = rsocketService;
+    public RabbitApplication(PersonService personService,
+                             MessageConverter messageConverter,
+                             Enricher enricherService) {
         this.personService = personService;
         this.messageConverter = messageConverter;
-        this.starService = starService;
+        this.enricherService = enricherService;
     }
 
     public static void main(String[] args) {
@@ -95,11 +89,10 @@ public class RabbitApplication implements CommandLineRunner {
                     log.error("Processing error on object ::" + o);
                     delivery.nack(false);
                 }))
-                .flatMap(starService::getWebClientStars)
-//                .flatMap(rsocketService::rsocketEnricher)
+                .flatMap(enricherService::enrich)
                 .onErrorContinue(((throwable, o) -> {
                     log.error("Enrichment error error on object ::" + o);
-                    delivery.nack(false);
+                    delivery.nack(true);
                 }))
                 .map(personDto -> {
                     personDto.setAge(15);
