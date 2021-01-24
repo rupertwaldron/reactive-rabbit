@@ -5,4 +5,4 @@ dependencies {
     implementation 'io.projectreactor:reactor-tools'
 }
 
-mainClassName = 'rabbit.RabbitApplication'
+mainClassName = 'chunky.ChunkyApplication'

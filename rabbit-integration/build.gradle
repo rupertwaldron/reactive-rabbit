@@ -1,6 +1,6 @@
 apply plugin: 'application'
 dependencies {
-    compile group: 'io.projectreactor.rabbitmq', name: 'reactor-rabbitmq', version: '1.5.0'
+    compile group: 'io.projectreactor.rabbitmq', name: 'reactor-rabbitmq', version: '1.5.1'
     implementation 'org.springframework.boot:spring-boot-starter-rsocket'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'

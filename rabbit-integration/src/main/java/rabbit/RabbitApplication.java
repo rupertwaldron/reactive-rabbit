@@ -22,7 +22,6 @@ import java.nio.file.StandardOpenOption;
 
 @Slf4j
 @SpringBootApplication
-//@EnableAsync
 public class RabbitApplication implements CommandLineRunner {
 
     private static final String QUEUE_NAME = "myqueue2";
@@ -56,7 +55,6 @@ public class RabbitApplication implements CommandLineRunner {
             final Flux<AcknowledgableDelivery> acknowledgableDeliveryFlux = receiver
                     .consumeManualAck(QUEUE_NAME)
                     .share();
-
 
             acknowledgableDeliveryFlux
                     .filter(messageConverter::checkForEOD)
