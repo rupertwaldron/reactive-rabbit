@@ -2,6 +2,8 @@ package rabbit.service;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import rabbit.repository.PersonDto;
 import reactor.core.publisher.Mono;
@@ -19,16 +21,12 @@ public class WebClientService implements Enricher{
     }
 
     public Mono<PersonDto> enrich(PersonDto personDto) {
-        return webClient.get()
+        return webClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/stars")
-                        .queryParam("id", personDto.getName())
                         .build())
+                .body(BodyInserters.fromValue(personDto))
                 .retrieve()
-                .bodyToMono(String.class)
-                .map(id -> {
-                    personDto.setName(id);
-                    return personDto;
-                });
+                .bodyToMono(PersonDto.class);
     }
 }
