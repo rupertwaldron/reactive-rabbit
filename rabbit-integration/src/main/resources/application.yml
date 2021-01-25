@@ -4,4 +4,4 @@ spring:
       uri: mongodb://localhost:27017/test
 
   profiles:
-    active: rsocket
+    active: webclient
